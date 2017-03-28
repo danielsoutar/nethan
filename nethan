@@ -2,20 +2,17 @@
 var fs = require("fs");
 
 
-function Nethan() { 
+function Nethan() {
 	var description = JSON.parse(fs.readFileSync("./nethan.json", "utf8"));
 };
 
 Nethan.prototype = {
-	
-};
-
-Nethan.prototype.makeMove = function makeMove(cells) {
-	console.log('\033c');
-	console.log("Nethan making a move");
-	setTimeout(function() {
-
-	}, 3000);
-};
-
+	makeMove: function(cells) {
+		setTimeout(function() {
+			console.log('\033c');
+			console.log("Nethan making a move");
+		}, 1000);
+		return;
+	}
+}
 module.exports = Nethan;
