@@ -1,0 +1,23 @@
+[0,0] -- \
+		  O -- \
+[0,0] -- /      O //FINAL_ROW_1
+			   /
+[0,0] ------- /
+[0,0] -- \
+		  O -- \
+[0,0] -- /      O //FINAL_ROW_2
+			   /
+[0,0] ------- /
+[0,0] -- \
+		  O -- \
+[0,0] -- /      O //FINAL_ROW_3
+			   /
+[0,0] ------- /
+
+FINAL_ROW_1, FINAL_ROW_2, FINAL_ROW_3
+FINAL_COL_1, FINAL_COL_2, FINAL_COL_3
+FINAL_DIAG_1, FINAL_DIAG_2
+
+^ Those 8 nodes will need to connect to (a series of) max() node(s) where the highest outcome is pushed through to output. The one with the highest score is the worst outcome for Nethan. So Nethan will say "I will minimise my worst possible loss by picking that one."
+
+Effectively, this neural net will learn to apply the minimax algorithm.
