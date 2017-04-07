@@ -1,4 +1,3 @@
-
 module.exports = Nethan;
 
 //nethan
@@ -13,7 +12,6 @@ var dot = Matrix.multiplyElements;
 var scalar = Matrix.multiplyScalar;
 var add = Matrix.add;
 
-<<<<<<< HEAD
 var number_of_layers = 0;
 var number_of_inputs = 0;
 var number_of_outputs = 0;
@@ -74,7 +72,6 @@ Nethan.prototype.forward_propogate = function forward_propogate(examples) {
 	var results = [];
 
 	results.push(sum(weights[0], examples.input, activation_function[0].f, activation_function[0].alpha));
-
 	for(var i = 1; i < this.layers.length; i++)
 		results.push(sum(weights[i], results[i - 1].result, activation_function[i].f, activation_function[i].alpha));
 
@@ -110,17 +107,14 @@ Nethan.prototype.back_propogate = function back_propogate(examples, results) {
 
 function sum(weights, inputs, activation_function, alpha) {
 	var weighted_inputs = {};
-
 	weighted_inputs.sum = multiply(weights, inputs);
 	if(activation_function == sigmoid_function)
 		weighted_inputs.result = weighted_inputs.sum.transform(function(x) {return 1 / (1 + Math.exp(-(alpha * x)))});
-
 	return weighted_inputs;
 }
 
 Nethan.prototype.learn_from = function learn_from(examples) {
 	examples = normalise(examples);
-
 
 	for(var i = 0; i < this.iterations; i++) {
 		var results = this.forward_propogate(examples);
@@ -187,10 +181,6 @@ var result = n.predict([0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0.5, 1]);
 console.log(result);
 
 n.write_description_to(file_name);
-=======
-function Nethan() {
-	var description = JSON.parse(fs.readFileSync("./nethan.json", "utf8"));
-};
 
 Nethan.prototype = {
 	makeMove: function(cells) {
@@ -201,5 +191,3 @@ Nethan.prototype = {
 		return;
 	}
 }
-module.exports = Nethan;
->>>>>>> c82acbbe8c0b438c3b92179e04ebe8324de4cf91
