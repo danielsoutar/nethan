@@ -1,23 +1,65 @@
-[0,0] -- \
-		  O -- \
-[0,0] -- /      O //FINAL_ROW_1
-			   /
-[0,0] ------- /
-[0,0] -- \
-		  O -- \
-[0,0] -- /      O //FINAL_ROW_2
-			   /
-[0,0] ------- /
-[0,0] -- \
-		  O -- \
-[0,0] -- /      O //FINAL_ROW_3
-			   /
-[0,0] ------- /
+The input layout will be as follows:
 
-FINAL_ROW_1, FINAL_ROW_2, FINAL_ROW_3
-FINAL_COL_1, FINAL_COL_2, FINAL_COL_3
-FINAL_DIAG_1, FINAL_DIAG_2
+		* O (Nought) -->   0
+		* _ (Empty)  --> 0.5
+		* X (Cross)  -->   1
 
-^ Those 8 nodes will need to connect to (a series of) max() node(s) where the highest outcome is pushed through to output. The one with the highest score is the worst outcome for Nethan. So Nethan will say "I will minimise my worst possible loss by picking that one."
+The input will obviously be entered in the following form:
 
-Effectively, this neural net will learn to apply the minimax algorithm.
+e.g. [0.5, 0, 1, 1, 1, 0, 0, 0.5, 0.5]
+
+The output should correspond to the actual layout of the board that Nethan believes works best for him. See the example below:
+
+E.g:
+
+IN:
+[ O ] [   ] [   ]
+[ X ] [ X ] [   ]     ---> [0, 0.5, 0.5, 1, 1, 0.5, 0.5, 0.5, 0.5]
+[   ] [   ] [   ]
+
+OUT:
+[ O ] [   ] [   ]
+[ X ] [ X ] [ O ]     ---> [0, 0.5, 0.5, 1, 1, 0, 0.5, 0.5, 0.5]
+[   ] [   ] [   ]
+
+IN:
+[   ] [ O ] [ X ]
+[   ] [ X ] [   ]     ---> [0.5, 0, 1, 0.5, 1, 0.5, 0.5, 0.5, 0.5]
+[   ] [   ] [   ]
+
+OUT:
+[   ] [ O ] [ X ]
+[   ] [ X ] [   ]     ---> [0.5, 0, 1, 0.5, 1, 0.5, 0, 0.5, 0.5]
+[ O ] [   ] [   ]
+
+IN:
+[ X ] [   ] [ X ]
+[   ] [ O ] [   ]     ---> [1, 0.5, 1, 0.5, 0, 0.5, 0.5, 0.5, 0.5]
+[   ] [   ] [   ]
+
+OUT:
+[ X ] [ O ] [ X ]
+[   ] [ O ] [   ]     ---> [1, 0, 1, 0.5, 0, 0.5, 0.5, 0.5, 0.5]
+[   ] [   ] [   ]
+
+IN:
+[   ] [   ] [   ]
+[   ] [ O ] [   ]     ---> [0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0.5, 1]
+[ X ] [   ] [ X ]
+
+OUT:
+[   ] [   ] [   ]
+[   ] [ O ] [   ]     ---> [0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0, 1]
+[ X ] [ O ] [ X ]
+
+
+
+
+Because my values are within the range of 0 to 1, I can use the sigmoid function, round the numbers to the nearest half, and then return the array of values. This means it can output the actual values of the cells rather than having to convert to them in some way or another.
+
+
+
+
+
+
+

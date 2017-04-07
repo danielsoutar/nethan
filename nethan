@@ -1,21 +1,188 @@
-//nethan
-var fs = require("fs");
-
-
-function Nethan() { 
-	var description = JSON.parse(fs.readFileSync("./nethan.json", "utf8"));
-};
-
-Nethan.prototype = {
-	
-};
-
-Nethan.prototype.makeMove = function makeMove(cells) {
-	console.log('\033c');
-	console.log("Nethan making a move");
-	setTimeout(function() {
-
-	}, 3000);
-};
 
 module.exports = Nethan;
+
+//nethan
+var fs = require("fs");
+var Matrix = require("node-matrix");
+var file_name = "temp_nethan.json";
+
+
+var multiply = Matrix.multiply;
+var subtract = Matrix.subtract;
+var dot = Matrix.multiplyElements;
+var scalar = Matrix.multiplyScalar;
+var add = Matrix.add;
+
+var number_of_layers = 0;
+var number_of_inputs = 0;
+var number_of_outputs = 0;
+
+//Assumes a fixed size of number of layers. Should make this modular (later!)
+function Nethan() { 
+	var description = JSON.parse(fs.readFileSync(file_name, "utf8"));
+	this.number_of_inputs = description.nr_inputs;
+	this.number_of_outputs = description.nr_outputs;
+	this.number_of_layers = description.nr_layers;
+
+	this.layers = [];
+	for(var i = 0; i < this.number_of_layers - 1; i++)
+		this.layers[i] = description.layers[i];
+
+	this.weights = configure_weights(this.layers);
+	this.units = configure_units(this.layers);
+	this.learning_rate = 1;
+	this.iterations = 10000;
+};
+
+function configure_weights(layers) {
+	var weights = [];
+
+	for(var i = 0; i < layers.length; i++)
+		weights.push(Matrix(layers[i].input_weights));
+
+	return weights;
+};
+
+function configure_units(layers) {
+	var units = [];
+
+	for(var i = 0; i < layers.length; i++)
+		if(layers[i].activation_function.type == "sigmoid") {
+			var a = layers[i].activation_function.alpha;
+			units.push({ 
+				f: sigmoid_function, 
+				f_prime: sigmoid_derivative,
+				alpha: a
+			});
+		}
+
+	return units;
+};
+
+function sigmoid_function(x) { 
+	return 1 / (1 + Math.exp(-(a * x))); 
+};
+
+function sigmoid_derivative(x) {
+	return Math.exp(-(a * x)) / Math.pow(1 + Math.exp(-(a * x)), 2);
+};
+
+Nethan.prototype.forward_propogate = function forward_propogate(examples) {
+	var activation_function = this.units;     //To be selected at the given layer
+	var weights = this.weights;
+	var results = [];
+
+	results.push(sum(weights[0], examples.input, activation_function[0].f, activation_function[0].alpha));
+
+	for(var i = 1; i < this.layers.length; i++)
+		results.push(sum(weights[i], results[i - 1].result, activation_function[i].f, activation_function[i].alpha));
+
+	return results;
+};
+
+Nethan.prototype.back_propogate = function back_propogate(examples, results) {
+	var activation_function_prime = this.units;
+	var function_prime = activation_function_prime[0].f_prime;
+	var alpha = activation_function_prime[0].alpha;
+
+	var layers = this.layers;
+	var learning_rate = this.learning_rate;
+	var weights = this.weights;
+
+	var error = subtract(examples.output, results[results.length - 1].result);
+	var delta = dot(results[results.length - 1].sum.transform(function(x) {return Math.exp(-(alpha * x)) / Math.pow(1 + Math.exp(-(alpha * x)), 2)}), error);
+	var changes = scalar(multiply(delta, results[0].result.transpose()), learning_rate);
+	weights[weights.length - 1] = add(weights[weights.length - 1], changes);
+
+	for(var i = 1; i < layers.length - 1; i++) {
+		delta = dot(multiply(weights[weights.length - i].transpose(), delta), results[results.length - (i + 1)].sum.transform(function(x) {return Math.exp(-(alpha * x)) / Math.pow(1 + Math.exp(-(alpha * x)), 2)}));
+		changes = scalar(multiply(delta, results[results.length - (i + 1)].result.transpose()), learning_rate);
+		weights[weights.length - (i + 1)] = add(weights[weights.length - (i + 1)], changes);
+	}
+
+	delta = dot(multiply(weights[1].transpose(), delta), results[0].sum.transform(function(x) {return Math.exp(-(alpha * x)) / Math.pow(1 + Math.exp(-(alpha * x)), 2)}));
+	changes = scalar(multiply(delta, examples.input.transpose()), learning_rate);
+	weights[0] = add(weights[0], changes);
+
+	return error;
+};
+
+function sum(weights, inputs, activation_function, alpha) {
+	var weighted_inputs = {};
+
+	weighted_inputs.sum = multiply(weights, inputs);
+	if(activation_function == sigmoid_function)
+		weighted_inputs.result = weighted_inputs.sum.transform(function(x) {return 1 / (1 + Math.exp(-(alpha * x)))});
+
+	return weighted_inputs;
+}
+
+Nethan.prototype.learn_from = function learn_from(examples) {
+	examples = normalise(examples);
+
+
+	for(var i = 0; i < this.iterations; i++) {
+		var results = this.forward_propogate(examples);
+		var errors = this.back_propogate(examples, results);
+	}
+
+	return this;
+}
+
+function normalise(examples) {
+	var io_map = { input: [], output: [] };
+	for(var i = 0; i < examples.length; i++) {
+		io_map.input.push(examples[i].input);
+		io_map.output.push(examples[i].output);
+	}
+	io_map.input = Matrix(io_map.input);
+	io_map.output = Matrix(io_map.output);
+
+	return io_map;
+}
+
+Nethan.prototype.write_description_to = function write_description_to(file_name) {
+	for(var i = 0; i < this.layers.length; i++)
+		this.layers[i].input_weights = get_2d_array_from(this.weights[i]);
+
+	fs.writeFile(file_name, JSON.stringify({
+		nr_inputs: this.number_of_inputs,
+		nr_outputs: this.number_of_outputs,
+		nr_layers: this.number_of_layers,
+		layers: this.layers
+	}), function (err) {
+		if (err) return console.log(err);
+		console.log("Nethan written to: " + file_name);
+	});
+};
+
+function get_2d_array_from(matrix) {
+	var weights = new Array(matrix.dimensions[0]);
+	for(var i = 0; i < weights.length; i++)
+		weights[i] = new Array(matrix.dimensions[1]);
+
+	for(var i = 0; i < weights.length; i++)
+		for(var j = 0; j < weights[i].length; j++)
+			weights[i][j] = matrix[i][j];
+
+	return weights;
+}
+
+var n = new Nethan();
+
+n = n.learn_from([
+    { input: [0, 0.5, 0.5, 1, 1, 0.5, 0.5, 0.5, 0.5], output: [0, 0.5, 0.5, 1, 1, 0, 0.5, 0.5, 0.5] },
+    { input: [0.5, 0, 1, 0.5, 1, 0.5, 0.5, 0.5, 0.5], output: [0.5, 0, 1, 0.5, 1, 0.5, 0, 0.5, 0.5] },
+    { input: [1, 0.5, 1, 0.5, 0, 0.5, 0.5, 0.5, 0.5], output: [1, 0, 1, 0.5, 0, 0.5, 0.5, 0.5, 0.5] },
+    { input: [0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0.5, 1], output: [0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0, 1] }
+  ]);
+
+Nethan.prototype.predict = function(input) {
+  var results = this.forward_propogate({ input: Matrix([input]) });
+  return results[results.length - 1].result[0];
+};
+
+var result = n.predict([0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0.5, 1]);
+console.log(result);
+
+n.write_description_to(file_name);

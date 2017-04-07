@@ -2,25 +2,23 @@
 
 //opening message
 function welcome() {
-	console.log("Welcome. Moves are entered in the form 'x, y', where x and y range from 1 - 3.");
+	console.log("Welcome. Moves are entered with a single number between 1 to 9.");
 	console.log("When done, press enter. You will play Crosses (the 'X' character), to go first.");
 }
 
 //set up
 
 var Nethan = require("./nethan");
-var nethan = new Nethan();
+//var nethan = new Nethan();
 
-var board_dimension = 3;
-var BOARD_MIN = 1;
-var BOARD_MAX = board_dimension;
-var cells = [board_dimension];
+var BOARD_LENGTH = 9;
+var cells = [BOARD_LENGTH];
 
 var x_to_play = true;
 var game_over = false;
 
-var number_of_coordinates = 2;
-var user_move = [number_of_coordinates];
+var number_of_moves = 0;
+var MAX_NUMBER_MOVES = 9;
 
 function empty() {
 	this.cell = "[   ]";
@@ -35,28 +33,18 @@ function o() {
 }
 
 function init_board() {
-	for(var i = 0; i < board_dimension; i++)
-		cells[i] = [board_dimension];
-
-	for(var i = 0; i < board_dimension; i++)
-		for(var j = 0; j < board_dimension; j++)
-			cells[i][j] = new empty();
+	for(var i = 0; i < BOARD_LENGTH; i++)
+		cells[i] = new empty();
 }
 
 //validation
 
-function out_of_bounds(coordinate) {
-	return coordinate > BOARD_MAX || BOARD_MIN > coordinate;
+function not_empty_at(input) {
+	return !(cells[input - 1] instanceof empty);
 }
 
-function not_empty_at(x, y) {
-	return !(cells[x - 1][y - 1] instanceof empty);
-}
-
-function valid_input() {
-	if(out_of_bounds(user_move[0]) || out_of_bounds(user_move[1]))
-		return false;
-	else if(not_empty_at(user_move[0], user_move[1]))
+function valid_input(input) {
+	if(not_empty_at(input))
 		return false;
 	else
 		return true;
@@ -64,11 +52,11 @@ function valid_input() {
 
 //modification
 
-function update_board() {
+function update_board(input) {
 	if(x_to_play)
-		cells[user_move[0] - 1][user_move[1] - 1] = new x();
+		cells[input - 1] = new x();
 	else
-		cells[user_move[0] - 1][user_move[1] - 1] = new o();
+		cells[input - 1] = new o();
 }
 
 //io
@@ -76,7 +64,7 @@ function update_board() {
 var stdin = process.stdin;
 
 var input = "";
-var expression = /^\d\s*\,\s*\d$/;
+var expression = /^[1-9]$/;
 
 function addPlayers() {
 	welcome();
@@ -88,34 +76,40 @@ function callback(d) {
 
 	input = d.toString().trim();
 	if(!expression.test(input)) {
-		message = "Please enter a move of the form 'x, y' and press enter.\n";
+		message = "Please enter a number between 1 and 9, and press enter.\n";
 		print_board(message);
 		return;
 	}
 
 	input = input.replace(/ /g, "");
-	user_move = input.split(",");
 
-	if(valid_input()) {
-		update_board();
+	if(valid_input(input)) {
+		update_board(input);
 		x_to_play = !(x_to_play);
+		number_of_moves++;
 	}
 	else
 		message = "Invalid move. Please try again.\n";
 
-	nethan.makeMove(cells);
+	//nethan.makeMove(cells);
 	print_board(message);
+	if(number_of_moves == MAX_NUMBER_MOVES) 
+			process.exit();
 }
 
 function print_board(message) {
 	console.log('\033c');
-	for(var i = 0; i < board_dimension; i++) {
-		var line = "";
-		for(var j = 0; j < board_dimension; j++)
-			line += cells[i][j].cell + " ";
-		console.log(line);
-		console.log();
+
+	var line = "";
+	for(var i = 0; i < BOARD_LENGTH; i++) {
+		line += cells[i].cell + " ";
+		if((i + 1) % 3 == 0) {
+			console.log(line);
+			console.log();
+			line = "";
+		}
 	}
+
 	if(message == undefined)
 		message = "";
 	x_to_play ? message += "Crosses to play." : message += "Nethan to play";
