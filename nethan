@@ -13,6 +13,7 @@ var dot = Matrix.multiplyElements;
 var scalar = Matrix.multiplyScalar;
 var add = Matrix.add;
 
+<<<<<<< HEAD
 var number_of_layers = 0;
 var number_of_inputs = 0;
 var number_of_outputs = 0;
@@ -186,3 +187,19 @@ var result = n.predict([0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0.5, 1]);
 console.log(result);
 
 n.write_description_to(file_name);
+=======
+function Nethan() {
+	var description = JSON.parse(fs.readFileSync("./nethan.json", "utf8"));
+};
+
+Nethan.prototype = {
+	makeMove: function(cells) {
+		setTimeout(function() {
+			console.log('\033c');
+			console.log("Nethan making a move");
+		}, 1000);
+		return;
+	}
+}
+module.exports = Nethan;
+>>>>>>> c82acbbe8c0b438c3b92179e04ebe8324de4cf91
