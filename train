@@ -1,0 +1,25 @@
+var Nethan = require("./nethan");
+var fs = require("fs");
+var input_file_name = "./training_data_0.json";
+var nethan_description = "./nethan.json";
+var output_file_name = nethan_description;
+
+var examples = JSON.parse(fs.readFileSync(input_file_name, "utf8"));
+
+var n = new Nethan(nethan_description);
+
+//try predicting them first time
+var correct_pre = 0;
+for(var i = 0; i < examples.length; i++) {
+	if(n.predict(examples[i].input) == examples[i].output)
+		correct_pre++;
+}
+console.log((correct_pre / examples.length) + "% predicted correctly");
+
+for(var i = 0; i < 3000; i++)
+	n = n.learn_from(examples);
+
+console.log(n.predict([0, 0, 0, 0, -1, 0, 1, 0, 0]));
+
+
+n.write_description_to(output_file_name);

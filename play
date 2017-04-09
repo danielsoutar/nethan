@@ -3,17 +3,19 @@
 //opening message
 function welcome() {
 	console.log("Welcome. Moves are entered with a single number between 1 to 9.");
-	console.log("When done, press enter. You will play Crosses (the 'X' character), to go first.");
+	console.log("Please enter 'X' or 'O' to indicate which player you are.");
 }
 
 //set up
 
 var Nethan = require("./nethan");
-//var nethan = new Nethan();
+var nethan_description = "./nethan.json";
+var nethan = new Nethan(nethan_description);
 
 var BOARD_LENGTH = 9;
 var cells = [BOARD_LENGTH];
 
+var setting_up = true;
 var x_to_play = true;
 var game_over = false;
 
@@ -64,18 +66,38 @@ function update_board(input) {
 var stdin = process.stdin;
 
 var input = "";
-var expression = /^[1-9]$/;
+var symbol_expression = /^[XO]$/;
+var move_expression = /^[1-9]$/;
 
-function addPlayers() {
+function select_symbol(input) {
+	if(!symbol_expression.test(input)) {
+		console.log("Please choose to play either 'X' or 'O'.\n");
+		process.exit(0);
+	}
+	if(input == "X")
+		x_to_play = true;
+	else
+		x_to_play = false;
+
+	nethan.set_symbol(!x_to_play);
+	setting_up = false;
+	console.log("Now enter your first move.");
+}
+
+function add_players() {
 	welcome();
 	stdin.addListener("data", callback);
 }
 
 function callback(d) {
+	input = d.toString().trim();
+
+	if(setting_up)
+		select_symbol(input);
+
 	var message = "";
 
-	input = d.toString().trim();
-	if(!expression.test(input)) {
+	if(!move_expression.test(input)) {
 		message = "Please enter a number between 1 and 9, and press enter.\n";
 		print_board(message);
 		return;
@@ -85,21 +107,37 @@ function callback(d) {
 
 	if(valid_input(input)) {
 		update_board(input);
-		x_to_play = !(x_to_play);
 		number_of_moves++;
 	}
 	else
 		message = "Invalid move. Please try again.\n";
 
-	//nethan.makeMove(cells);
+	cells = convert_from(nethan.makeMove(cells));
 	print_board(message);
 	if(number_of_moves == MAX_NUMBER_MOVES) 
 			process.exit();
 }
 
-function print_board(message) {
-	console.log('\033c');
+function convert_from(nethan_response) {
+	for(var i = 0; i < BOARD_LENGTH; i++) {
+		if(nethan_response[i] == 0.5)
+			cells[i] = new empty();
+		else if(x_to_play) {
+			if(nethan_response[i] == 0)
+				cells[i] = new o();
+			else
+				cells[i] = new x();
+		}
+		else
+			if(nethan_response[i] == 0)
+				cells[i] = new x();
+			else
+				cells[i] = new o();
+	}
+	return cells;
+}
 
+function print_board(message) {
 	var line = "";
 	for(var i = 0; i < BOARD_LENGTH; i++) {
 		line += cells[i].cell + " ";
@@ -112,11 +150,11 @@ function print_board(message) {
 
 	if(message == undefined)
 		message = "";
-	x_to_play ? message += "Crosses to play." : message += "Nethan to play";
-	console.log(message);
+	if(!setting_up)
+		console.log(message);
 }
 
 //logic
 init_board();
 print_board();
-addPlayers();
+add_players();

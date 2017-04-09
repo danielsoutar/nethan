@@ -1,64 +1,90 @@
-The input layout will be as follows:
+The input encoding will be as follows:
 
 		* O (Nought) -->   0
 		* _ (Empty)  --> 0.5
 		* X (Cross)  -->   1
 
-The input will obviously be entered in the following form:
+The input will thus be entered in the following form:
 
 e.g. [0.5, 0, 1, 1, 1, 0, 0, 0.5, 0.5]
 
-The output should correspond to the actual layout of the board that Nethan believes works best for him. See the example below:
+The output should correspond to the actual layout of the board that Nethan believes works best for him. See the examples below:
 
 E.g:
 
 IN:
 [ O ] [   ] [   ]
-[ X ] [ X ] [   ]     ---> [0, 0.5, 0.5, 1, 1, 0.5, 0.5, 0.5, 0.5]
+[ X ] [ X ] [   ]    ---> [0, 0.5, 0.5, 1, 1, 0.5, 0.5, 0.5, 0.5] //Deny opponent victory
 [   ] [   ] [   ]
 
 OUT:
 [ O ] [   ] [   ]
-[ X ] [ X ] [ O ]     ---> [0, 0.5, 0.5, 1, 1, 0, 0.5, 0.5, 0.5]
+[ X ] [ X ] [ O ]    ---> [0, 0.5, 0.5, 1, 1, 0, 0.5, 0.5, 0.5]
 [   ] [   ] [   ]
 
 IN:
 [   ] [ O ] [ X ]
-[   ] [ X ] [   ]     ---> [0.5, 0, 1, 0.5, 1, 0.5, 0.5, 0.5, 0.5]
+[   ] [ X ] [   ]    ---> [0.5, 0, 1, 0.5, 1, 0.5, 0.5, 0.5, 0.5] //Deny opponent victory
 [   ] [   ] [   ]
 
 OUT:
 [   ] [ O ] [ X ]
-[   ] [ X ] [   ]     ---> [0.5, 0, 1, 0.5, 1, 0.5, 0, 0.5, 0.5]
+[   ] [ X ] [   ]    ---> [0.5, 0, 1, 0.5, 1, 0.5, 0, 0.5, 0.5]
 [ O ] [   ] [   ]
 
 IN:
 [ X ] [   ] [ X ]
-[   ] [ O ] [   ]     ---> [1, 0.5, 1, 0.5, 0, 0.5, 0.5, 0.5, 0.5]
+[   ] [ O ] [   ]    ---> [1, 0.5, 1, 0.5, 0, 0.5, 0.5, 0.5, 0.5] //Deny opponent victory, set yourself up for victory
 [   ] [   ] [   ]
 
 OUT:
 [ X ] [ O ] [ X ]
-[   ] [ O ] [   ]     ---> [1, 0, 1, 0.5, 0, 0.5, 0.5, 0.5, 0.5]
+[   ] [ O ] [   ]    ---> [1, 0, 1, 0.5, 0, 0.5, 0.5, 0.5, 0.5]
 [   ] [   ] [   ]
 
 IN:
 [   ] [   ] [   ]
-[   ] [ O ] [   ]     ---> [0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0.5, 1]
+[   ] [ O ] [   ]    ---> [0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0.5, 1] //Deny opponent victory, set yourself up for victory
 [ X ] [   ] [ X ]
 
 OUT:
 [   ] [   ] [   ]
-[   ] [ O ] [   ]     ---> [0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0, 1]
+[   ] [ O ] [   ]    ---> [0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0, 1]
 [ X ] [ O ] [ X ]
 
+IN:
+[   ] [   ] [   ]
+[   ] [   ] [   ]    ---> [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5] //Make optimum move - centre of board
+[   ] [   ] [   ]
 
+OUT:
+[   ] [   ] [   ]
+[   ] [ O ] [   ]    ---> [0.5, 0.5, 0.5, 0.5, 0, 0.5, 0.5, 0.5, 0.5]
+[   ] [   ] [   ]
+
+IN:
+[ X ] [   ] [   ]
+[   ] [   ] [   ]    ---> [1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5] //Make optimum move - centre of board
+[   ] [   ] [   ]
+
+OUT:
+[ X ] [   ] [   ]
+[   ] [ O ] [   ]    ---> [1, 0.5, 0.5, 0.5, 0, 0.5, 0.5, 0.5, 0.5]
+[   ] [   ] [   ]
 
 
 Because my values are within the range of 0 to 1, I can use the sigmoid function, round the numbers to the nearest half, and then return the array of values. This means it can output the actual values of the cells rather than having to convert to them in some way or another.
 
 
 
+
+O _ O
+_ X X
+_ _ X
+
+O O O
+_ X X
+_ _ X
 
 
 

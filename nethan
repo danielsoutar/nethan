@@ -3,8 +3,6 @@ module.exports = Nethan;
 //nethan
 var fs = require("fs");
 var Matrix = require("node-matrix");
-var file_name = "temp_nethan.json";
-
 
 var multiply = Matrix.multiply;
 var subtract = Matrix.subtract;
@@ -16,8 +14,7 @@ var number_of_layers = 0;
 var number_of_inputs = 0;
 var number_of_outputs = 0;
 
-//Assumes a fixed size of number of layers. Should make this modular (later!)
-function Nethan() { 
+function Nethan(file_name) { 
 	var description = JSON.parse(fs.readFileSync(file_name, "utf8"));
 	this.number_of_inputs = description.nr_inputs;
 	this.number_of_outputs = description.nr_outputs;
@@ -29,8 +26,8 @@ function Nethan() {
 
 	this.weights = configure_weights(this.layers);
 	this.units = configure_units(this.layers);
-	this.learning_rate = 1;
-	this.iterations = 10000;
+	this.learning_rate = 0.00015;
+	this.iterations = 100;
 };
 
 function configure_weights(layers) {
@@ -66,7 +63,7 @@ function sigmoid_derivative(x) {
 	return Math.exp(-(a * x)) / Math.pow(1 + Math.exp(-(a * x)), 2);
 };
 
-Nethan.prototype.forward_propogate = function forward_propogate(examples) {
+Nethan.prototype.forward_propogate = function(examples) {
 	var activation_function = this.units;     //To be selected at the given layer
 	var weights = this.weights;
 	var results = [];
@@ -78,7 +75,7 @@ Nethan.prototype.forward_propogate = function forward_propogate(examples) {
 	return results;
 };
 
-Nethan.prototype.back_propogate = function back_propogate(examples, results) {
+Nethan.prototype.back_propogate = function(examples, results) {
 	var activation_function_prime = this.units;
 	var function_prime = activation_function_prime[0].f_prime;
 	var alpha = activation_function_prime[0].alpha;
@@ -113,12 +110,13 @@ function sum(weights, inputs, activation_function, alpha) {
 	return weighted_inputs;
 }
 
-Nethan.prototype.learn_from = function learn_from(examples) {
+Nethan.prototype.learn_from = function(examples) {
 	examples = normalise(examples);
 
 	for(var i = 0; i < this.iterations; i++) {
 		var results = this.forward_propogate(examples);
 		var errors = this.back_propogate(examples, results);
+		//console.log(errors);
 	}
 
 	return this;
@@ -136,7 +134,7 @@ function normalise(examples) {
 	return io_map;
 }
 
-Nethan.prototype.write_description_to = function write_description_to(file_name) {
+Nethan.prototype.write_description_to = function(file_name) {
 	for(var i = 0; i < this.layers.length; i++)
 		this.layers[i].input_weights = get_2d_array_from(this.weights[i]);
 
@@ -163,31 +161,54 @@ function get_2d_array_from(matrix) {
 	return weights;
 }
 
-var n = new Nethan();
-
-n = n.learn_from([
-    { input: [0, 0.5, 0.5, 1, 1, 0.5, 0.5, 0.5, 0.5], output: [0, 0.5, 0.5, 1, 1, 0, 0.5, 0.5, 0.5] },
-    { input: [0.5, 0, 1, 0.5, 1, 0.5, 0.5, 0.5, 0.5], output: [0.5, 0, 1, 0.5, 1, 0.5, 0, 0.5, 0.5] },
-    { input: [1, 0.5, 1, 0.5, 0, 0.5, 0.5, 0.5, 0.5], output: [1, 0, 1, 0.5, 0, 0.5, 0.5, 0.5, 0.5] },
-    { input: [0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0.5, 1], output: [0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0, 1] }
-  ]);
 
 Nethan.prototype.predict = function(input) {
   var results = this.forward_propogate({ input: Matrix([input]) });
   return results[results.length - 1].result[0];
 };
 
-var result = n.predict([0.5, 0.5, 0.5, 0.5, 0, 0.5, 1, 0.5, 1]);
-console.log(result);
-
-n.write_description_to(file_name);
-
-Nethan.prototype = {
-	makeMove: function(cells) {
-		setTimeout(function() {
-			console.log('\033c');
-			console.log("Nethan making a move");
-		}, 1000);
-		return;
+Nethan.prototype.set_symbol = function(is_x) {
+	if(is_x) {
+		this.symbol = "[ X ]";
+		this.opponent = "[ O ]";
 	}
+	else {
+		this.symbol = "[ O ]";
+		this.opponent = "[ X ]";
+	}
+	this.empty = "[   ]";
 }
+
+Nethan.prototype.convert_values_in = function(cells) {
+	var values = [];
+	for(var i = 0; i < cells.length; i++) {
+		if(cells[i].cell == this.empty)
+			values.push(0);
+		else if(cells[i].cell == this.symbol)
+			values.push(-1);
+		else if(cells[i].cell == this.opponent)
+			values.push(1)
+	}
+	return values;
+}
+
+Nethan.prototype.round_numbers_in = function(cells) {
+	for(var i = 0; i < cells.length; i++) {
+		if(cells[i] >= 0.66666)
+			cells[i] = 1;
+		else if(cells[i] <= 0.33333)
+			cells[i] = 0;
+		else
+			cells[i] = 0.5;
+	}
+	return cells;
+}
+
+Nethan.prototype.makeMove = function(cells) {
+	var processed_cells = this.convert_values_in(cells);
+	processed_cells = this.predict(processed_cells);
+	return processed_cells;
+};
+
+
+
