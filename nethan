@@ -14,7 +14,7 @@ var number_of_layers = 0;
 var number_of_inputs = 0;
 var number_of_outputs = 0;
 
-function Nethan(file_name) { 
+function Nethan(file_name) {
 	var description = JSON.parse(fs.readFileSync(file_name, "utf8"));
 	this.number_of_inputs = description.nr_inputs;
 	this.number_of_outputs = description.nr_outputs;
@@ -45,8 +45,8 @@ function configure_units(layers) {
 	for(var i = 0; i < layers.length; i++)
 		if(layers[i].activation_function.type == "sigmoid") {
 			var a = layers[i].activation_function.alpha;
-			units.push({ 
-				f: sigmoid_function, 
+			units.push({
+				f: sigmoid_function,
 				f_prime: sigmoid_derivative,
 				alpha: a
 			});
@@ -55,8 +55,8 @@ function configure_units(layers) {
 	return units;
 };
 
-function sigmoid_function(x) { 
-	return 1 / (1 + Math.exp(-(a * x))); 
+function sigmoid_function(x) {
+	return 1 / (1 + Math.exp(-(a * x)));
 };
 
 function sigmoid_derivative(x) {
@@ -209,6 +209,3 @@ Nethan.prototype.makeMove = function(cells) {
 	processed_cells = this.predict(processed_cells);
 	return processed_cells;
 };
-
-
-

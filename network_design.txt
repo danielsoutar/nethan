@@ -73,19 +73,48 @@ OUT:
 [   ] [   ] [   ]
 
 
+
+
+
 Because my values are within the range of 0 to 1, I can use the sigmoid function, round the numbers to the nearest half, and then return the array of values. This means it can output the actual values of the cells rather than having to convert to them in some way or another.
 
 
 
+[   ] [   ] [   ]
+[   ] [ X ] [   ]    ---> [0, 0, 0, 0, 1, 0, 0, 0, 0]
+[   ] [   ] [   ]
 
-O _ O
-_ X X
-_ _ X
+OUT:
+[   ] [   ] [   ]
+[   ] [ X ] [   ]    ---> [0.5, 0.5, 0.5, 0.5, 1, 0.5, 0, 0.5, 0.5]
+[ O ] [   ] [   ]
 
-O O O
-_ X X
-_ _ X
+IN:
+[   ] [   ] [   ]
+[   ] [ X ] [   ]    ---> [0, 0, 0, 0, 1, 0, -1, 1, 0]
+[ O ] [ X ] [   ]
 
+OUT:
+[   ] [ O ] [   ]
+[   ] [ X ] [   ]    ---> [0.5, 0, 0.5, 0.5, 1, 0.5, 0, 1, 0.5]
+[ O ] [ X ] [   ]
 
+IN:
+[ X ] [ O ] [   ]
+[   ] [ X ] [   ]    ---> [1, -1, 0, 0, 1, 0, -1, 1, 0]
+[ O ] [ X ] [   ]
 
+OUT:
+[ X ] [ O ] [   ]
+[   ] [ X ] [   ]    ---> [1, 0, 0.5, 0.5, 1, 0.5, 0, 1, 0]
+[ O ] [ X ] [ O ]
 
+IN:
+[ X ] [ O ] [   ]
+[   ] [ X ] [ X ]    ---> [1, -1, 0, 0, 1, 1, -1, 1, -1]
+[ O ] [ X ] [ O ]
+
+OUT:
+[ X ] [ O ] [   ]
+[ O ] [ X ] [ X ]    ---> [1, 0, 0.5, 0, 1, 1, 0, 1, 0]
+[ O ] [ X ] [ O ]

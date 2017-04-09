@@ -39,6 +39,63 @@ function init_board() {
 		cells[i] = new empty();
 }
 
+//checking for victory
+
+function check_for_victory(is_human) {
+	if(victory_in_row() || victory_in_col() || victory_in_diag()) {
+		if(is_human)
+			console.log("You win!");
+		else
+			console.log("Nethan wins!");
+		process.exit(0);
+	}
+}
+
+function victory_in_row() {
+	for(var row = 0; row < BOARD_LENGTH; row += 3) {
+		var x_victory = true, o_victory = true;
+		for(var col = 0; col < BOARD_LENGTH / 3; col++) {
+			var cell = cells[row + col];
+			if(cell instanceof x)
+				o_victory = false;
+			else if(cell instanceof o)
+				x_victory = false;
+			else
+				x_victory = o_victory = false;
+		}
+		if(x_victory || o_victory)
+			return true;
+	}
+	return false;
+}
+
+function victory_in_col() {
+	for(var row = 0; row < BOARD_LENGTH / 3; row++) {
+		var x_victory = true, o_victory = true;
+		for(var col = 0; col < BOARD_LENGTH; col += 3) {
+			var cell = cells[row + col];
+			if(cell instanceof x)
+				o_victory = false;
+			else if(cell instanceof o)
+				x_victory = false;
+			else
+				x_victory = o_victory = false;
+		}
+		if(x_victory || o_victory)
+			return true;
+	}
+	return false;
+}
+
+function victory_in_diag() {
+	if(cells[0].cell === cells[4].cell && cells[4].cell === cells[8].cell && !(cells[0] instanceof empty)) //first diag (1, 5, 9)
+		return true;
+	else if(cells[2].cell === cells[4].cell && cells[4].cell === cells[6].cell && !(cells[2] instanceof empty)) //second diag (3, 5, 7)
+		return true;
+	else
+		return false;
+}
+
 //validation
 
 function not_empty_at(input) {
@@ -108,28 +165,34 @@ function callback(d) {
 	if(valid_input(input)) {
 		update_board(input);
 		number_of_moves++;
+		print_board(message);
+		check_for_victory(true);
+		if(number_of_moves == MAX_NUMBER_MOVES) {
+			console.log("It's a draw!");
+			process.exit();
+		}
 	}
 	else
 		message = "Invalid move. Please try again.\n";
 
 	cells = convert_from(nethan.makeMove(cells));
+	number_of_moves++;
 	print_board(message);
-	if(number_of_moves == MAX_NUMBER_MOVES) 
-			process.exit();
+	check_for_victory(false);
 }
 
 function convert_from(nethan_response) {
 	for(var i = 0; i < BOARD_LENGTH; i++) {
-		if(nethan_response[i] == 0.5)
+		if(nethan_response[i] >= 0.33333 && nethan_response[i] <= 0.66666)
 			cells[i] = new empty();
 		else if(x_to_play) {
-			if(nethan_response[i] == 0)
+			if(nethan_response[i] < 0.33333)
 				cells[i] = new o();
 			else
 				cells[i] = new x();
 		}
 		else
-			if(nethan_response[i] == 0)
+			if(nethan_response[i] < 0.33333)
 				cells[i] = new x();
 			else
 				cells[i] = new o();
