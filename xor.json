@@ -1,1 +1,28 @@
-{"nr_inputs":2,"nr_outputs":1,"nr_layers":3,"layers":[{"nr_nodes":3,"activation_function":{"type":"sigmoid","alpha":1},"input_weights":[[5.863805103696903,6.842154775320587,-4.535230080584963],[5.862442747562142,-4.522565569173307,6.878615446734869]]},{"nr_nodes":1,"activation_function":{"type":"sigmoid","alpha":1},"input_weights":[[18.492610512323225],[-13.523091810676663],[-13.520701012409944]]}]}
+{
+	"nr_inputs":2,
+	"nr_outputs":1,
+	"nr_layers":3,
+	"layers": [
+		{
+			"nr_nodes":3,
+			"activation_function":{
+				"type":"sigmoid","alpha":1
+			},
+			"input_weights": [
+				[5.864861732284585,6.843334568169561,-4.536659130125821],
+				[5.863500877473937,-4.524002346225191,6.879776906115225]
+			]
+		},
+		{
+			"nr_nodes":1,
+			"activation_function": {
+				"type":"sigmoid","alpha":1
+			},
+			"input_weights": [
+				[18.503897764972248],
+				[-13.531614754388956],
+				[-13.529227137992535]
+			]
+		}
+	]
+}
